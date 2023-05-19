@@ -1,4 +1,30 @@
 function BlogForm() {
+  // function createBlog({ title, description }) {
+  const postData = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/blog/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: "Hellow world",
+          description: "this is just for the demo purpose",
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data);
+        alert("Created new blog");
+      } else {
+        throw new Error("Error creating blog");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  // }
   return (
     <>
       <form>
@@ -25,7 +51,7 @@ function BlogForm() {
           />
         </div>
 
-        <button type="submit" className="btn btn-primary">
+        <button type="submit" className="btn btn-primary" onClick={postData}>
           Submit
         </button>
       </form>

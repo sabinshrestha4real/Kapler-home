@@ -3,7 +3,8 @@ const express = require("express");
 
 //initializing express server
 const app = express();
-
+// using cors for corssplatform error
+const cors = require("cors");
 // Importing mongoose
 const mongoose = require("mongoose");
 
@@ -12,9 +13,10 @@ const blogRoutes = require("./routes/blogRoutes");
 
 //middleware
 app.use(express.json());
-
+app.use(cors());
 //take path of groups
 app.use("/blog", blogRoutes);
+
 //credential database
 const credential = require("./credentials");
 

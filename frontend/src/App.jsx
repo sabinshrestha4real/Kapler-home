@@ -1,5 +1,5 @@
 import Navbar from "./components/Navbar";
-import BlogList from "./components/BlogList";
+import BlogList from "./components/BlogLIst";
 import BlogForm from "./components/BlogForm";
 function App() {
   return (
