@@ -1,39 +1,52 @@
-//importing express package
+// Importing express package
 const express = require("express");
 
-//initializing express server
-const app = express();
-// using cors for corssplatform error
-const cors = require("cors");
 // Importing mongoose
 const mongoose = require("mongoose");
 
-//importing routes
+// Importing cors
+const cors = require("cors");
+
+// Importing dotenv
+const dotenv = require("dotenv");
+
+// initializing express server
+const app = express();
+
+dotenv.config();
+
+// importing routes
 const blogRoutes = require("./routes/blogRoutes");
 
-//middleware
-app.use(express.json());
+// Responding to the request
+
+// app.get("/hi/:id", (req, res) => {
+//   res.json({
+//     message: "Hi",
+//   });
+// });
+
+// app.post("/hello", (req, res) => {
+//   res.json({
+//     message: "Hello route called",
+//   });
+// });
+
 app.use(cors());
-//take path of groups
+app.use(express.json());
+
 app.use("/blog", blogRoutes);
 
-//credential database
-const credential = require("./credentials");
-
-//connection to our database
+// connecting to our database
 mongoose
-  .connect(
-    `mongodb+srv://admin:${credential}@cluster0.nkk5cmb.mongodb.net/?retryWrites=true&w=majority`
-  )
-  .then((response) => {
+  .connect(process.env.MONGODB_URL)
+  .then(() => {
     console.log("Connected to database");
+    // listening to the request
+    app.listen(process.env.PORT, () => {
+      console.log("Server is running !!");
+    });
   })
-  .catch((err) => {
-    console.log("Failed to connect");
+  .catch((error) => {
+    console.log(error.message);
   });
-
-// blog is group name
-// listening to the request
-app.listen(8000, () => {
-  console.log("Server is running");
-});

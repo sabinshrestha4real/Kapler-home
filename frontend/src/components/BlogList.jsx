@@ -25,7 +25,7 @@ function BlogList({ allBlogs, setAllBlogs,setTitle, setDescription, setIsUpdate,
     if (confirmation) {
       axios({
         method: "DELETE",
-        url: "http://localhost:8000/blog/delete/" + blogId,
+        url: import.meta.env.VITE_API_URL + "/blog/delete/" + blogId,
       })
         .then(() => {
           alert("Blog has been deleted successfully");
@@ -77,7 +77,7 @@ function BlogList({ allBlogs, setAllBlogs,setTitle, setDescription, setIsUpdate,
                   // deleteBlog(blog._id);
                 }}
               >
-                Update
+                Edit
               </button>
             </div>
 
