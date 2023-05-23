@@ -5,22 +5,21 @@ const router = express.Router();
 const Blog = require("../models/blogModel");
 
 //Endpoint to create blog
+// Endpoint to create blog
 router.post("/create", async (req, res) => {
   try {
     let newBlog = await Blog.create({
-      title: req.body.name,
-
+      title: req.body.title,
       description: req.body.description,
     });
 
     res.json({
       message: "Blog has been created",
-
       data: newBlog,
     });
-  } catch (err) {
+  } catch (error) {
     res.status(400).json({
-      message: err.message,
+      message: error.message,
     });
   }
 });
@@ -53,16 +52,20 @@ router.delete("/delete/:id", async (req, res) => {
 //Endpoinnt to update blog
 router.put("/update/:id", async (req, res) => {
   try {
-    let updateBlog = await Blog.findByIdAndUpdate(
+  await Blog.findByIdAndUpdate(
       { _id: req.params.id },
       {
-        title: req.body.name,
+        title: req.body.title,
         description: req.body.description,
       }
     );
     res.json({
-      message: `${req.body.name} updated`,
-      data: updateBlog,
+      message: `${req.body.title} updated`,
+      data: {
+        _id: req.params.id,
+        title: req.body.title,
+        description: req.body.description,
+      },
     });
   } catch (error) {
     res.status(400).json({

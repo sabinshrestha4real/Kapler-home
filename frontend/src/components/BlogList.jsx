@@ -1,10 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 
-function BlogList() {
-  // State to store blogs
-  const [allBlogs, setAllBlogs] = useState([]);
-
+function BlogList({ allBlogs, setAllBlogs,setTitle, setDescription, setIsUpdate, setBlogId}) {
   // Function to fetch all blogs from the server
   function getAllBlogs() {
     axios({
@@ -12,8 +9,8 @@ function BlogList() {
       url: "http://localhost:8000/blog/get",
     })
       .then((res) => {
-        console.log(res.data.data);
-        setAllBlogs(res.data.data);
+        //reversing list so that lastest data is at top
+        setAllBlogs(res.data.data.reverse());
       })
       .catch((err) => {
         console.log(err.message);
@@ -43,8 +40,7 @@ function BlogList() {
           console.log(err);
         });
     }
-  }
-
+  }-
   // Hook to execute the function once
   useEffect(() => {
     getAllBlogs();
@@ -52,7 +48,7 @@ function BlogList() {
 
   return (
     <>
-      {allBlogs.map((blog) => {
+      {allBlogs.reverse().map((blog) => {
         return (
           <div className="card my-4" key={blog._id}>
             <div className="card-body">
@@ -68,7 +64,24 @@ function BlogList() {
               >
                 Delete
               </button>
+              {" "} 
+              <button
+                className="btn btn-primary"
+                onClick={() => {
+                 
+                  setTitle(blog.title);
+                  setDescription(blog.description);
+                  setIsUpdate(true);
+                  setBlogId(blog._id);
+                  
+                  // deleteBlog(blog._id);
+                }}
+              >
+                Update
+              </button>
             </div>
+
+            
           </div>
         );
       })}
