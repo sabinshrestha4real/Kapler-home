@@ -40,14 +40,18 @@ router.post("/register", async (req, res) => {
   try {
     const existingUser = await UserModel.findOne({ email: req.body.email });
     if (req.body.password !== req.body.confirm_password) {
-      return res.status(400).json({ message: "Password doesn't match" });
+      return res.status(400).json({
+        success: false,
+        message: "Password doesn't match" });
     }
 
     if (existingUser) {
-      return res.status(400).json({ message: "Email already exists" });
+      return res.status(400).json({ 
+        success:false,
+        message: "Email already exists" });
     }
 
-    let resgiterData = await UserModel.create({
+  await UserModel.create({
       name: req.body.name,
       phone: req.body.phone,
       address: req.body.address,
@@ -57,11 +61,14 @@ router.post("/register", async (req, res) => {
     });
 
     res.json({
+      success: true,
       message: "User successfully registered!",
-      data: resgiterData,
+   
     });
   } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error" });
   }
 });
 module.exports = router;
