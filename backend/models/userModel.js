@@ -26,5 +26,5 @@ const registerSchema = mongoose.Schema({
     required: true,
   },
 });
-
+//datbase table name "users"
 module.exports = mongoose.model("users", registerSchema);
