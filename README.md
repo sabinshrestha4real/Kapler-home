@@ -1,5 +1,8 @@
-Created simple Login/Register system without token, encrypt!! using Node,Express,MongoDB
-
+Created simple Login/Register using Node,Express,MongoDB.
+ <br />
+=> jwtwebtoken is used for authorization.
+=> bcryptjs is integrated for password encryption and decryption
+ <br />
 1. git clone "url"
 2. cd directory_name
 3. npm i //to install required packages
