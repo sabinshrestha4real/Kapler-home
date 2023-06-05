@@ -125,6 +125,12 @@ router.post("/register", async (req, res) => {
         message: "Email already exists",
       });
     }
+    if (req.body.password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be more than 6 characters",
+      });
+    }
     //encrypt password when everything executes properly
     const hashPass = await new Promise((resolve, reject) => {
       bcrypt.hash(req.body.password, 10, (err, hash) => {
