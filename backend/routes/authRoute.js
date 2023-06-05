@@ -47,7 +47,13 @@ router.post("/login", async (req, res) => {
       });
     }
     jwt.sign(
-      { user },
+      {
+        id: user._id,
+        name: user.name,
+        phone: user.phone,
+        address: user.address,
+        email: user.email,
+      },
       process.env.SECRET_KEY,
       { expiresIn: "30s" },
       (err, token) => {
