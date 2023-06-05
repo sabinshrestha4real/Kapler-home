@@ -8,22 +8,27 @@ const bcrypt = require("bcryptjs");
 
 const jwt = require("jsonwebtoken");
 
+const dotenv = require("dotenv");
+dotenv.config();
+
 router.post("/login", async (req, res) => {
   console.log("login api hit");
+
   try {
     const { email, password } = req.body;
     // console.log(email);
     const user = await UserModel.findOne({ email });
+
     // console.log(user);
     if (!user) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "Invalid email or password. Please check your credentials and try again.",
-        });
+      return res.status(400).json({
+        message:
+          "Invalid email or password. Please check your credentials and try again.",
+      });
     }
+
     let contains = await new Promise((resolve, reject) => {
+      //password compare from req and database
       bcrypt.compare(password, user.password, function (err, result) {
         console.log(result);
         if (err) {
@@ -36,31 +41,66 @@ router.post("/login", async (req, res) => {
 
     //encrypt returns true if password matches with database
     if (!contains) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "Invalid email or password. Please check your credentials and try again.",
-        });
+      return res.status(400).json({
+        message:
+          "Invalid email or password. Please check your credentials and try again.",
+      });
     }
+    jwt.sign(
+      { user },
+      process.env.SECRET_KEY,
+      { expiresIn: "30s" },
+      (err, token) => {
+        if (err) {
+        } else {
+          res.json({
+            success: true,
+            message: "Login Success",
+            data: {
+              token,
+            },
+          });
+        }
+      }
+    );
     // if(){}
-    res.json({
-      success: true,
-      message: "Login Success",
-      data: {
-        id: user._id,
-        name: user.name,
-        phone: user.phone,
-        address: user.address,
-        email: user.email,
-      },
-    });
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
   }
-
-  // }
 });
+
+router.post("/profile", verifyToken, (req, res) => {
+  jwt.verify(req.token, process.env.SECRET_KEY, (err, result) => {
+    if (err) {
+      res.status(401).json({ success: false, message: "Invalid Token." });
+    } else {
+      res.json({
+        success: true,
+        message: "Profile successfully fetched",
+        data: {
+          id: result._id,
+          name: result.name,
+          phone: result.phone,
+          address: result.address,
+          email: result.email,
+        },
+      });
+    }
+  });
+});
+
+function verifyToken(req, res, next) {
+  const header = req.headers["authorization"];
+  if (typeof header !== "undefined") {
+    //split text for removing bearer
+    const bearer = header.split(" ");
+    const token = bearer[1];
+    req.token = token;
+    next();
+  } else {
+    res.status(401).json({ success: false, message: "Invalid Token" });
+  }
+}
 
 router.post("/register", async (req, res) => {
   try {
