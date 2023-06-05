@@ -1,6 +1,8 @@
 Created simple Login/Register using Node,Express,MongoDB.
  <br />
+ <br />
 => jwtwebtoken is used for authorization.
+<br />
 => bcryptjs is integrated for password encryption and decryption
  <br />
 1. git clone "url"
