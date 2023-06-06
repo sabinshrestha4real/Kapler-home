@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-module.exports.profile_post = (req, res) => {
+exports.profile_get = (req, res) => {
   jwt.verify(req.token, process.env.SECRET_KEY, (err, result) => {
     if (err) {
       res.status(401).json({ success: false, message: "Invalid Token." });
@@ -20,7 +20,7 @@ module.exports.profile_post = (req, res) => {
   });
 };
 
-module.exports.verifyToken = (req, res, next) => {
+exports.verifyToken = (req, res, next) => {
   const header = req.headers["authorization"];
   if (typeof header !== "undefined") {
     //split text for removing bearer

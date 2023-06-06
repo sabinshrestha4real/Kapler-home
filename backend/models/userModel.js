@@ -25,6 +25,12 @@ const registerSchema = mongoose.Schema({
     type: String,
     required: true,
   },
+  token: {
+    type: String,
+  },
+  signedAt: {
+    type: String,
+  },
 });
 //datbase table name "users"
 module.exports = mongoose.model("users", registerSchema);

@@ -1,6 +1,7 @@
 const UserModel = require("../models/userModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { undefined } = require("webidl-conversions");
 
 module.exports.login_post = async (req, res) => {
   // console.log("login api hit");
@@ -37,34 +38,68 @@ module.exports.login_post = async (req, res) => {
           "Invalid email or password. Please check your credentials and try again.",
       });
     }
-    jwt.sign(
-      {
-        id: user._id,
-        name: user.name,
-        phone: user.phone,
-        address: user.address,
-        email: user.email,
-      },
-      process.env.SECRET_KEY,
-      { expiresIn: "30s" },
-      (err, token) => {
-        if (err) {
-        } else {
-          res.json({
-            success: true,
-            message: "Login Success",
-            data: {
-              token,
-            },
-          });
-        }
+
+    let myToken = "";
+    let existingToken = user.token;
+    // console.log("Token check: " + existingToken);
+    if (typeof existingToken !== "undefined") {
+      // console.log("time: " + user.signedAt);
+      // existingToken = existingToken.filter((e) => {
+      const timeDiff = (Date.now() - parseInt(user.signedAt)) / 1000;
+
+      // console.log(timeDiff);
+      if (timeDiff < 10) {
+        myToken = existingToken;
+      } else {
+        //if time difference is less greater than int 10
+        myToken = createJwt(user);
       }
-    );
+      await UserModel.findByIdAndUpdate(
+        { _id: user._id },
+        {
+          token: myToken,
+          signedAt: Date.now().toString(),
+        }
+      );
+    } else {
+      myToken = createJwt(user);
+      await UserModel.findByIdAndUpdate(
+        { _id: user._id },
+        {
+          token: myToken,
+          signedAt: Date.now().toString(),
+        }
+      );
+      // console.log("new token created: " + myToken);
+    }
+    res.json({
+      success: true,
+      message: "Login Success",
+      data: {
+        token: myToken,
+      },
+    });
     // if(){}
   } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
+    // console.log(error);
+    res.status(500).json({ message: error });
   }
 };
+
+function createJwt(user) {
+  // console.log(user);
+  return jwt.sign(
+    {
+      id: user._id,
+      name: user.name,
+      phone: user.phone,
+      address: user.address,
+      email: user.email,
+    },
+    process.env.SECRET_KEY,
+    { expiresIn: "10s" } //expire token in 10 seconds
+  );
+}
 
 module.exports.register_post = async (req, res) => {
   try {
