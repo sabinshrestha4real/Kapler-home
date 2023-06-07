@@ -1,7 +1,6 @@
 const UserModel = require("../models/userModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { undefined } = require("webidl-conversions");
 
 module.exports.login_post = async (req, res) => {
   // console.log("login api hit");
@@ -39,17 +38,13 @@ module.exports.login_post = async (req, res) => {
       });
     }
 
-    let myToken = "";
-    let existingToken = user.token;
-    // console.log("Token check: " + existingToken);
-    if (typeof existingToken !== "undefined") {
-      // console.log("time: " + user.signedAt);
-      // existingToken = existingToken.filter((e) => {
-      const timeDiff = (Date.now() - parseInt(user.signedAt)) / 1000;
+    let myToken;
+    // let existingToken = user.token;
 
-      // console.log(timeDiff);
+    if (typeof user.token !== "undefined") {
+      const timeDiff = (Date.now() - parseInt(user.signedAt)) / 1000;
       if (timeDiff < 10) {
-        myToken = existingToken;
+        myToken = user.token;
       } else {
         //if time difference is less greater than int 10
         myToken = createJwt(user);
@@ -97,7 +92,7 @@ function createJwt(user) {
       email: user.email,
     },
     process.env.SECRET_KEY,
-    { expiresIn: "10s" } //expire token in 10 seconds
+    { expiresIn: "120s" } //expire token in 10 seconds
   );
 }
 
@@ -153,5 +148,26 @@ module.exports.register_post = async (req, res) => {
       success: false,
       message: "Internal server error",
     });
+  }
+};
+
+//logout and remove user token from database
+module.exports.logout_post = async (req, res) => {
+  try {
+    if (typeof req.body.id !== "undefined") {
+      const id = req.body.id;
+      // const user = await UserModel.findById(id);
+
+      await UserModel.findByIdAndUpdate(id, {
+        $unset: { token: 1, signedAt: 1 },
+      });
+      // console.log(user);
+
+      res.json({ success: true, message: "Logout Success" });
+    } else {
+      res.status(401).json({ success: false, message: "Logout Failed" });
+    }
+  } catch (error) {
+    res.status(401).json({ success: false, message: error.toString() });
   }
 };
