@@ -38,40 +38,37 @@ module.exports.login_post = async (req, res) => {
       });
     }
 
-    let myToken;
+    let accessToken;
+    let refreshToken;
     // let existingToken = user.token;
 
     if (typeof user.token !== "undefined") {
-      const timeDiff = (Date.now() - parseInt(user.signedAt)) / 1000;
-      if (timeDiff < 10) {
-        myToken = user.token;
-      } else {
-        //if time difference is less greater than int 10
-        myToken = createJwt(user);
-      }
+      accessToken = createAccessToken(user);
+      refreshToken = createRefreshToken(user);
       await UserModel.findByIdAndUpdate(
         { _id: user._id },
         {
-          token: myToken,
+          token: refreshToken,
           signedAt: Date.now().toString(),
         }
       );
     } else {
-      myToken = createJwt(user);
+      // accessToken = createAccessToken(user);
+      refreshToken = createRefreshToken(user);
       await UserModel.findByIdAndUpdate(
         { _id: user._id },
         {
-          token: myToken,
+          token: refreshToken,
           signedAt: Date.now().toString(),
         }
       );
-      // console.log("new token created: " + myToken);
     }
     res.json({
       success: true,
       message: "Login Success",
       data: {
-        token: myToken,
+        access_token: accessToken,
+        refresh_token: refreshToken,
       },
     });
     // if(){}
@@ -80,8 +77,58 @@ module.exports.login_post = async (req, res) => {
     res.status(500).json({ message: error });
   }
 };
+//create new access_token using refresh token
+module.exports.refresh_token = async (req, res) => {
+  const header = req.headers["authorization"];
+  const bearer = header.split(" ");
+  const refreshToken = bearer[1];
+  const id = req.body.id;
+  const user = await UserModel.findById(id);
+  // console.log(user.name);
 
-function createJwt(user) {
+  t;
+  //check refresh token from database
+  if (!refreshToken) {
+    res.status(405).json({ success: false, message: "Token not found" });
+  }
+  if (user.token !== refreshToken) {
+    res.status(401).json({ success: false, message: "Invalid Refresh token" });
+  }
+  jwt.verify(
+    user.token,
+    process.env.REFRESH_TOKEN_SECRET_KEY,
+    (err, decode) => {
+      if (err) {
+        res.status(406).json({ success: false, message: err.toString() });
+      } else {
+        const accessToken = createAccessToken(user);
+        res.status(200).json({
+          success: true,
+          data: {
+            access_token: accessToken,
+          },
+        });
+      }
+    }
+  );
+};
+
+//create accessToken short-lice
+function createAccessToken(user) {
+  return jwt.sign(
+    {
+      id: user._id,
+      name: user.name,
+      phone: user.phone,
+      address: user.address,
+      email: user.email,
+    },
+    process.env.ACCEESS_TOKEN_SECRET_KEY,
+    { expiresIn: "30s" } //expire token in 10 seconds
+  );
+}
+//refresh token for longer duration
+function createRefreshToken(user) {
   // console.log(user);
   return jwt.sign(
     {
@@ -91,8 +138,8 @@ function createJwt(user) {
       address: user.address,
       email: user.email,
     },
-    process.env.SECRET_KEY,
-    { expiresIn: "120s" } //expire token in 10 seconds
+    process.env.REFRESH_TOKEN_SECRET_KEY,
+    { expiresIn: "10m" } //expire token in 10 seconds
   );
 }
 

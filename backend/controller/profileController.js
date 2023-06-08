@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 
 exports.profile_get = (req, res) => {
-  jwt.verify(req.token, process.env.SECRET_KEY, (err, result) => {
+  jwt.verify(req.token, process.env.ACCEESS_TOKEN_SECRET_KEY, (err, result) => {
     if (err) {
       res.status(401).json({ success: false, message: "Invalid Token." });
     } else {
